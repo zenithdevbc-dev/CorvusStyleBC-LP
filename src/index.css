@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+
+/* Paleta extraída da logo Corvus Style: preto, bordô e dourado */
+@theme {
+  --color-ink: #0a0a0b;
+  --color-surface: #121113;
+  --color-line: #29242a;
+  --color-wine: #7a0f1e;
+  --color-wine-bright: #9e1628;
+  --color-gold: #d8b65c;
+  --color-gold-dim: #9c7f3a;
+  --color-bone: #f2eee6;
+  --color-muted: #a39e96;
+
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Inter Tight', system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink font-sans text-bone antialiased;
+  }
+  ::selection {
+    @apply bg-gold text-ink;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-gold;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(10 10 11 / 0.8);
+  backdrop-filter: blur(2px);
+}
