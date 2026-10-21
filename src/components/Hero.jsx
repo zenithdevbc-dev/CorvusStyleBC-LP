@@ -26,8 +26,8 @@ export default function Hero() {
           <div className="flex items-center gap-1 text-sm font-medium text-muted sm:gap-2">
             {[
               ['#servicos', 'Serviços'],
+              ['#resultado', 'Resultado'],
               ['#orcamento', 'Orçamento'],
-              ['#precos', 'Preços'],
             ].map(([href, label]) => (
               <a key={href} href={href} className="hidden rounded-lg px-3 py-2 transition-all duration-200 ease-in-out hover:bg-ink/5 hover:text-ink md:inline">
                 {label}
