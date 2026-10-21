@@ -8,7 +8,7 @@ const STACK = [
   ['React 19 + Vite', 'Componentes funcionais com hooks, build estático servido por qualquer CDN.'],
   ['Tailwind CSS v4', 'Paleta da marca como design tokens em @theme e classes de componente (botões, cards) num só lugar. Só o CSS usado vai para produção.'],
   ['Lucide React', 'Ícones SVG importados um a um, entram no bundle apenas os usados.'],
-  ['Performance', 'Logo convertida para WebP (73 kB contra 863 kB do PNG original), fonte com preconnect e display=swap, slider antes/depois desenhado em CSS, sem biblioteca de UI.'],
+  ['Performance', 'Imagens convertidas para WebP (fotos do antes/depois de ~2 MB para ~60 kB cada, logo de 863 kB para 73 kB), fotos com carregamento lazy, fonte com preconnect e display=swap, sem biblioteca de UI.'],
   ['Fluidez', 'Transições de 200 ms em botões, cards e opções, esqueleto de carregamento nas imagens e animações desligadas para quem usa prefers-reduced-motion.'],
   ['Acessibilidade', 'Calculadora com radio e checkbox nativos, slider é um input range (teclado e leitor de tela), tabela de preços semântica e modal com <dialog> nativo (foco e Esc).'],
   ['UX e conversão', 'Preço em tempo real reduz a fricção do "quanto custa?". O botão gera a mensagem do WhatsApp já com veículo, pacote, adicionais e total.'],

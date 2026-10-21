@@ -1,7 +1,7 @@
 // Tabela de preços e geração da mensagem do WhatsApp. Sem React: testável com `npm test`.
 
-// Troque pelo número real, só dígitos com DDI + DDD (ex.: 5547999999999)
-export const WHATSAPP_NUMBER = 'SEUNUMERO'
+// Só dígitos: DDI 55 + DDD + número (o wa.me não funciona sem o DDI)
+export const WHATSAPP_NUMBER = '5516994011355'
 
 export const VEHICLES = [
   { id: 'hatch', label: 'Hatch / Sedan' },
@@ -14,7 +14,7 @@ export const PACKAGES = [
     id: 'basico',
     label: 'Básico',
     description: 'Lavagem detalhada, aspiração interna e limpeza de painel e vidros.',
-    prices: { hatch: 85, suv: 95, pickup: 110 },
+    prices: { hatch: 90, suv: 100, pickup: 120 },
   },
   {
     id: 'tecnico',
@@ -58,3 +58,4 @@ export function buildWhatsAppLink(vehicleId, packageId, addonIds, phone = WHATSA
 
 export const genericWhatsAppLink = (phone = WHATSAPP_NUMBER) =>
   `https://wa.me/${phone}?text=${encodeURIComponent('Olá, Corvus Style! Quero agendar um horário.')}`
+

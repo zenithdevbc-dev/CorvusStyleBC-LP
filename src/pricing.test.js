@@ -1,21 +1,27 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { calcTotal, buildWhatsAppLink } from './pricing.js'
+import { calcTotal, buildWhatsAppLink, genericWhatsAppLink } from './pricing.js'
 
 test('preço base por veículo e pacote', () => {
-  assert.equal(calcTotal('hatch', 'basico', []), 85)
-  assert.equal(calcTotal('suv', 'basico', []), 95)
+  assert.equal(calcTotal('hatch', 'basico', []), 90)
+  assert.equal(calcTotal('suv', 'basico', []), 100)
+  assert.equal(calcTotal('pickup', 'basico', []), 120)
   assert.equal(calcTotal('pickup', 'tecnico', []), 180)
 })
 
 test('soma adicionais e ignora ids desconhecidos', () => {
   assert.equal(calcTotal('hatch', 'tecnico', ['ar', 'motor', 'vidros']), 130 + 50 + 90 + 40)
-  assert.equal(calcTotal('suv', 'basico', ['vidros', 'xyz']), 95 + 40)
+  assert.equal(calcTotal('suv', 'basico', ['vidros', 'xyz']), 100 + 40)
 })
 
 test('combinação inválida lança erro', () => {
   assert.throws(() => calcTotal('moto', 'basico', []))
   assert.throws(() => calcTotal('hatch', 'premium', []))
+})
+
+test('links usam o número padrão com DDI', () => {
+  assert.ok(buildWhatsAppLink('hatch', 'basico', []).startsWith('https://wa.me/5516994011355?text='))
+  assert.ok(genericWhatsAppLink().startsWith('https://wa.me/5516994011355?text='))
 })
 
 test('link do WhatsApp contém itens e total, codificados', () => {

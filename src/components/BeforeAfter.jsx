@@ -1,15 +1,9 @@
 import { useState } from 'react'
 import { ChevronsLeftRight } from 'lucide-react'
+import Img from './Img.jsx'
 
-// shortcut: pintura simulada em CSS (zero bytes de imagem); trocar por fotos reais antes/depois quando houver
-const PAINT =
-  'radial-gradient(ellipse 60% 40% at 28% 18%, rgb(255 255 255 / 0.28), transparent 60%),' +
-  'linear-gradient(104deg, transparent 44%, rgb(255 255 255 / 0.16) 49%, transparent 54%),' +
-  'linear-gradient(160deg, #5c0a16 0%, #250307 42%, #7a0f1e 68%, #140205 100%)'
-const SWIRLS =
-  'repeating-radial-gradient(circle at 62% 48%, rgb(255 255 255 / 0.07) 0 1px, transparent 1px 6px),' +
-  'repeating-radial-gradient(circle at 20% 80%, rgb(255 255 255 / 0.05) 0 1px, transparent 1px 9px),' +
-  'radial-gradient(circle at 40% 60%, rgb(160 140 120 / 0.25), transparent 50%)'
+// As duas fotos precisam ter o mesmo enquadramento e tamanho (1536×1024)
+const photo = { width: 1536, height: 1024, loading: 'lazy', decoding: 'async', draggable: false }
 
 export default function BeforeAfter() {
   const [pos, setPos] = useState(50)
@@ -22,14 +16,17 @@ export default function BeforeAfter() {
             <span className="eyebrow">Resultado</span>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">Arraste para ver a diferença</h2>
           </div>
-          <p className="max-w-xs text-muted">Micro-riscos, manchas e opacidade saem. A cor volta a ter profundidade.</p>
+          <p className="max-w-xs text-muted">Barro, poeira e manchas saem. A pintura e as rodas voltam a ter brilho.</p>
         </div>
 
-        <div className="relative aspect-[4/3] select-none overflow-hidden rounded-2xl shadow-md sm:aspect-[16/7]">
-          <div className="absolute inset-0" style={{ background: PAINT }} />
-          <div
-            className="absolute inset-0"
-            style={{ clipPath: `inset(0 ${100 - pos}% 0 0)`, background: `${SWIRLS}, ${PAINT}`, filter: 'saturate(0.45) brightness(0.7) contrast(0.85)' }}
+        <div className="relative aspect-[3/2] select-none overflow-hidden rounded-2xl bg-surface shadow-md">
+          <Img src="./depois.webp" alt="Honda Civic preto limpo e com brilho, depois do detalhamento" {...photo} className="size-full" />
+          <img
+            src="./antes.webp"
+            alt="O mesmo carro sujo de barro e poeira, antes do detalhamento"
+            {...photo}
+            className="absolute inset-0 size-full object-cover"
+            style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
           />
 
           <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow-sm">Antes</span>
@@ -52,7 +49,6 @@ export default function BeforeAfter() {
             className="absolute inset-0 size-full cursor-ew-resize opacity-0"
           />
         </div>
-        <p className="mt-3 text-xs text-muted">Simulação ilustrativa de correção de pintura.</p>
       </div>
     </section>
   )
