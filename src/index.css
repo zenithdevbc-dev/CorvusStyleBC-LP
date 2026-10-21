@@ -1,33 +1,57 @@
 @import 'tailwindcss';
 
-/* Paleta extraída da logo Corvus Style: preto, bordô e dourado */
+/* Paleta da marca Corvus Style (bordô e dourado) sobre base clara */
 @theme {
-  --color-ink: #0a0a0b;
-  --color-surface: #121113;
-  --color-line: #29242a;
+  --color-canvas: #faf9f6;
+  --color-surface: #ffffff;
+  --color-line: #e9e6e1;
+  --color-ink: #1a1718;
+  --color-muted: #6b6560;
   --color-wine: #7a0f1e;
-  --color-wine-bright: #9e1628;
-  --color-gold: #d8b65c;
-  --color-gold-dim: #9c7f3a;
-  --color-bone: #f2eee6;
-  --color-muted: #a39e96;
+  --color-wine-dark: #5c0b17;
+  --color-wine-soft: #f8edef;
+  --color-gold: #c9a24a;
+  --color-gold-soft: #faf3e3;
 
-  --font-display: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'Inter Tight', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --animate-pop: pop 0.25s ease-out;
+  @keyframes pop {
+    from {
+      opacity: 0.3;
+      transform: translateY(3px);
+    }
+  }
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
   }
   body {
-    @apply bg-ink font-sans text-bone antialiased;
+    @apply bg-canvas font-sans text-ink antialiased;
   }
   ::selection {
-    @apply bg-gold text-ink;
+    @apply bg-wine text-white;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-gold;
+    @apply outline-2 outline-offset-2 outline-wine;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-wine px-6 py-3.5 font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-wine-dark hover:shadow-md active:translate-y-0 active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-surface px-6 py-3.5 font-semibold text-ink transition-all duration-200 ease-in-out hover:border-ink/20 hover:shadow-sm active:scale-[0.98];
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-sm transition-all duration-200 ease-in-out;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full bg-wine-soft px-3 py-1 text-xs font-semibold text-wine;
   }
 }
 
@@ -39,10 +63,11 @@
   *::before,
   *::after {
     transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
   }
 }
 
 dialog::backdrop {
-  background: rgb(10 10 11 / 0.8);
-  backdrop-filter: blur(2px);
+  background: rgb(26 23 24 / 0.45);
+  backdrop-filter: blur(4px);
 }

@@ -1,6 +1,7 @@
 import Hero from './components/Hero.jsx'
 import Calculator from './components/Calculator.jsx'
 import BeforeAfter from './components/BeforeAfter.jsx'
+import PriceTable from './components/PriceTable.jsx'
 import Footer from './components/Footer.jsx'
 
 export default function App() {
@@ -9,6 +10,7 @@ export default function App() {
       <Hero />
       <main>
         <Calculator />
+        <PriceTable />
         <BeforeAfter />
       </main>
       <Footer />

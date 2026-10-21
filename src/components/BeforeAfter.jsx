@@ -16,27 +16,27 @@ export default function BeforeAfter() {
 
   return (
     <section id="resultado" className="border-y border-line bg-surface">
-      <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-28">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <p className="mb-4 text-xs font-medium uppercase tracking-[0.3em] text-gold">Resultado</p>
-            <h2 className="font-display text-4xl leading-tight sm:text-6xl">Arraste. Veja a diferença.</h2>
+            <span className="eyebrow">Resultado</span>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">Arraste para ver a diferença</h2>
           </div>
-          <p className="max-w-xs text-sm text-muted">Micro-riscos, manchas e opacidade somem. A cor volta a ter profundidade.</p>
+          <p className="max-w-xs text-muted">Micro-riscos, manchas e opacidade saem. A cor volta a ter profundidade.</p>
         </div>
 
-        <div className="relative aspect-[4/3] select-none overflow-hidden border border-line sm:aspect-[16/7]">
+        <div className="relative aspect-[4/3] select-none overflow-hidden rounded-2xl shadow-md sm:aspect-[16/7]">
           <div className="absolute inset-0" style={{ background: PAINT }} />
           <div
             className="absolute inset-0"
             style={{ clipPath: `inset(0 ${100 - pos}% 0 0)`, background: `${SWIRLS}, ${PAINT}`, filter: 'saturate(0.45) brightness(0.7) contrast(0.85)' }}
           />
 
-          <span className="absolute left-4 top-4 bg-ink/80 px-2 py-1 text-xs uppercase tracking-[0.2em]">Antes</span>
-          <span className="absolute right-4 top-4 bg-ink/80 px-2 py-1 text-xs uppercase tracking-[0.2em] text-gold">Depois</span>
+          <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow-sm">Antes</span>
+          <span className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-wine shadow-sm">Depois</span>
 
-          <div className="pointer-events-none absolute inset-y-0 w-px bg-gold" style={{ left: `${pos}%` }} aria-hidden="true">
-            <span className="absolute left-1/2 top-1/2 flex size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center border border-gold bg-ink text-gold">
+          <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-white" style={{ left: `${pos}%` }} aria-hidden="true">
+            <span className="absolute left-1/2 top-1/2 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-ink shadow-md">
               <ChevronsLeftRight className="size-5" />
             </span>
           </div>
