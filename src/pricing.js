@@ -25,7 +25,6 @@ export const PACKAGES = [
 ]
 
 export const ADDONS = [
-  { id: 'ar', label: 'Higienização de ar-condicionado', price: 50 },
   { id: 'motor', label: 'Detalhamento de motor', price: 90 },
   { id: 'vidros', label: 'Cristalização de vidros', price: 40 },
 ]
