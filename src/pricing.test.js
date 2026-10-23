@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { calcTotal, buildWhatsAppLink, genericWhatsAppLink, findCoupon, discountValue, COUPONS } from './pricing.js'
+import { calcTotal, buildWhatsAppLink, genericWhatsAppLink, findCoupon, discountValue, COUPONS, toggleAddon } from './pricing.js'
 
 test('preço base por veículo e pacote', () => {
   assert.equal(calcTotal('hatch', 'basico', []), 90)
@@ -10,8 +10,14 @@ test('preço base por veículo e pacote', () => {
 })
 
 test('soma adicionais e ignora ids desconhecidos', () => {
-  assert.equal(calcTotal('hatch', 'tecnico', ['motor', 'vidros']), 130 + 90 + 40)
-  assert.equal(calcTotal('suv', 'basico', ['vidros', 'xyz']), 100 + 40)
+  assert.equal(calcTotal('hatch', 'tecnico', ['motor', 'vidros-parabrisa']), 130 + 90 + 40)
+  assert.equal(calcTotal('suv', 'basico', ['vidros-todos', 'xyz']), 100 + 120)
+})
+
+test('cristalização: para-brisa e todos os vidros se excluem', () => {
+  assert.deepEqual(toggleAddon(['motor', 'vidros-parabrisa'], 'vidros-todos'), ['motor', 'vidros-todos'])
+  assert.deepEqual(toggleAddon(['vidros-todos'], 'vidros-todos'), [])
+  assert.deepEqual(toggleAddon(['vidros-todos'], 'motor'), ['vidros-todos', 'motor'])
 })
 
 test('combinação inválida lança erro', () => {

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ArrowRight, Car, Check, Info } from 'lucide-react'
-import { ADDONS, PACKAGES, VEHICLES, buildWhatsAppLink, calcTotal, discountValue, findCoupon, formatBRL } from '../pricing.js'
+import { ADDONS, PACKAGES, VEHICLES, buildWhatsAppLink, calcTotal, discountValue, findCoupon, formatBRL, toggleAddon } from '../pricing.js'
 
 // Cupons já usados ficam no navegador do cliente; sem localStorage (aba anônima bloqueada) o controle só dura a visita
 const USED_KEY = 'corvus:cupons-usados'
@@ -42,7 +42,6 @@ export default function Calculator() {
   const [couponTouched, setCouponTouched] = useState(false)
   const [usedCoupons, setUsedCoupons] = useState(readUsed)
 
-  const toggleAddon = (id) => setAddons((list) => (list.includes(id) ? list.filter((a) => a !== id) : [...list, id]))
   const total = calcTotal(vehicle, pkg, addons)
   const selectedPkg = PACKAGES.find((p) => p.id === pkg)
 
@@ -105,7 +104,7 @@ export default function Calculator() {
             <div className="grid gap-3">
               {ADDONS.map((a) => (
                 <label key={a.id} className={optionClass}>
-                  <input type="checkbox" checked={addons.includes(a.id)} onChange={() => toggleAddon(a.id)} className="peer sr-only" />
+                  <input type="checkbox" checked={addons.includes(a.id)} onChange={() => setAddons((list) => toggleAddon(list, a.id))} className="peer sr-only" />
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-md border border-ink/20 bg-surface text-transparent transition-all duration-200 peer-checked:border-wine peer-checked:bg-wine peer-checked:text-white">
                     <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />
                   </span>

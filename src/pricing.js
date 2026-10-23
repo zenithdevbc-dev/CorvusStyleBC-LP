@@ -26,8 +26,17 @@ export const PACKAGES = [
 
 export const ADDONS = [
   { id: 'motor', label: 'Detalhamento de motor', price: 90 },
-  { id: 'vidros', label: 'Cristalização de vidros', price: 40 },
+  // Mesmo `group` = opções que se excluem (marcar uma desmarca a outra)
+  { id: 'vidros-parabrisa', label: 'Cristalização de vidros (só para-brisa)', price: 40, group: 'vidros' },
+  { id: 'vidros-todos', label: 'Cristalização de vidros (todos os vidros)', price: 120, group: 'vidros' },
 ]
+
+export function toggleAddon(selected, id) {
+  if (selected.includes(id)) return selected.filter((a) => a !== id)
+  const group = byId(ADDONS, id)?.group
+  const sameGroup = (a) => group && byId(ADDONS, a)?.group === group
+  return [...selected.filter((a) => !sameGroup(a)), id]
+}
 
 // Cupons: ative ou desative trocando `active`. O código é comparado sem diferenciar maiúsculas.
 // shortcut: os códigos ficam visíveis no JS do site e o "uso único" é só por navegador; trocar por backend se um cupom valer muito
