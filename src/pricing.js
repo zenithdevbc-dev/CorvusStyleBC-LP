@@ -29,6 +29,19 @@ export const ADDONS = [
   { id: 'vidros', label: 'Cristalização de vidros', price: 40 },
 ]
 
+// Cupons: ative ou desative trocando `active`. O código é comparado sem diferenciar maiúsculas.
+// shortcut: os códigos ficam visíveis no JS do site e o "uso único" é só por navegador; trocar por backend se um cupom valer muito
+export const COUPONS = [
+  { code: 'BRILHO15', percent: 15, active: true },
+]
+
+export function findCoupon(code) {
+  const coupon = COUPONS.find((c) => c.code === code.trim().toUpperCase())
+  return coupon?.active ? coupon : null
+}
+
+export const discountValue = (total, coupon) => (coupon ? Math.round(total * coupon.percent) / 100 : 0)
+
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 export const formatBRL = (value) => brl.format(value)
 
@@ -40,16 +53,19 @@ export function calcTotal(vehicleId, packageId, addonIds) {
   return pkg.prices[vehicleId] + ADDONS.filter((a) => addonIds.includes(a.id)).reduce((sum, a) => sum + a.price, 0)
 }
 
-export function buildWhatsAppLink(vehicleId, packageId, addonIds, phone = WHATSAPP_NUMBER) {
+export function buildWhatsAppLink(vehicleId, packageId, addonIds, coupon = null, phone = WHATSAPP_NUMBER) {
   const vehicle = byId(VEHICLES, vehicleId)
   const pkg = byId(PACKAGES, packageId)
   const extras = ADDONS.filter((a) => addonIds.includes(a.id))
+  const total = calcTotal(vehicleId, packageId, addonIds)
+  const discount = discountValue(total, coupon)
   const lines = [
     'Olá, Corvus Style! Quero agendar:',
     `• Veículo: ${vehicle.label}`,
     `• Pacote: ${pkg.label} (${formatBRL(pkg.prices[vehicleId])})`,
     ...extras.map((a) => `• + ${a.label} (${formatBRL(a.price)})`),
-    `Total estimado: ${formatBRL(calcTotal(vehicleId, packageId, addonIds))}`,
+    ...(coupon ? [`• Cupom ${coupon.code} (-${coupon.percent}%): -${formatBRL(discount)}`] : []),
+    `Total estimado: ${formatBRL(total - discount)}`,
     'Qual o melhor dia e horário?',
   ]
   return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`

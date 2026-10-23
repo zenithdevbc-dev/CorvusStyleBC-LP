@@ -1,6 +1,21 @@
 import { useState } from 'react'
 import { ArrowRight, Car, Check, Info } from 'lucide-react'
-import { ADDONS, PACKAGES, VEHICLES, buildWhatsAppLink, calcTotal, formatBRL } from '../pricing.js'
+import { ADDONS, PACKAGES, VEHICLES, buildWhatsAppLink, calcTotal, discountValue, findCoupon, formatBRL } from '../pricing.js'
+
+// Cupons já usados ficam no navegador do cliente; sem localStorage (aba anônima bloqueada) o controle só dura a visita
+const USED_KEY = 'corvus:cupons-usados'
+function readUsed() {
+  try {
+    return JSON.parse(localStorage.getItem(USED_KEY)) ?? []
+  } catch {
+    return []
+  }
+}
+function saveUsed(list) {
+  try {
+    localStorage.setItem(USED_KEY, JSON.stringify(list))
+  } catch {}
+}
 
 // Radio/checkbox nativos escondidos: teclado e leitor de tela funcionam sem código extra
 const optionClass =
@@ -23,9 +38,31 @@ export default function Calculator() {
   const [pkg, setPkg] = useState('basico')
   const [addons, setAddons] = useState([])
 
+  const [couponInput, setCouponInput] = useState('')
+  const [couponTouched, setCouponTouched] = useState(false)
+  const [usedCoupons, setUsedCoupons] = useState(readUsed)
+
   const toggleAddon = (id) => setAddons((list) => (list.includes(id) ? list.filter((a) => a !== id) : [...list, id]))
   const total = calcTotal(vehicle, pkg, addons)
   const selectedPkg = PACKAGES.find((p) => p.id === pkg)
+
+  const found = findCoupon(couponInput)
+  const alreadyUsed = Boolean(found && usedCoupons.includes(found.code))
+  const coupon = found && !alreadyUsed ? found : null
+  const discount = discountValue(total, coupon)
+  const couponError = alreadyUsed
+    ? 'Você já usou este cupom.'
+    : couponTouched && couponInput.trim() && !found
+      ? 'Cupom inválido ou expirado.'
+      : ''
+
+  // O uso é registrado quando o cliente envia o pedido com o cupom, não quando digita
+  const markCouponUsed = () => {
+    if (!coupon) return
+    const next = [...usedCoupons, coupon.code]
+    saveUsed(next)
+    setUsedCoupons(next)
+  }
 
   return (
     <section id="orcamento" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-28">
@@ -35,7 +72,7 @@ export default function Calculator() {
         <p className="mt-3 text-lg text-muted">O valor atualiza conforme você escolhe.</p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
         <div className="space-y-10">
           <Step n="1" title="Tipo de veículo">
             <div className="grid gap-3 sm:grid-cols-3">
@@ -80,7 +117,7 @@ export default function Calculator() {
           </Step>
         </div>
 
-        <aside className="card h-fit p-6 sm:p-8 lg:sticky lg:top-24">
+        <aside className="card h-fit p-6 lg:sticky lg:top-24">
           <h3 className="font-bold">Resumo do pedido</h3>
           <dl className="mt-6 space-y-4 border-b border-line pb-6 text-sm">
             <div className="flex justify-between gap-4">
@@ -97,17 +134,60 @@ export default function Calculator() {
                 <dd className="font-medium tabular-nums">{formatBRL(a.price)}</dd>
               </div>
             ))}
+            {coupon && (
+              <div className="flex justify-between gap-4 text-emerald-700 motion-safe:animate-pop">
+                <dt>
+                  Cupom {coupon.code} (-{coupon.percent}%)
+                </dt>
+                <dd className="font-medium tabular-nums">-{formatBRL(discount)}</dd>
+              </div>
+            )}
           </dl>
           <div className="mt-6 flex items-end justify-between gap-4" aria-live="polite">
             <span className="text-sm text-muted">Total estimado</span>
-            <span key={total} className="text-3xl font-extrabold tabular-nums tracking-tight motion-safe:animate-pop">
-              {formatBRL(total)}
+            <span className="text-right">
+              {coupon && <s className="block text-sm tabular-nums text-muted">{formatBRL(total)}</s>}
+              <span key={total - discount} className="text-3xl font-extrabold tabular-nums tracking-tight motion-safe:animate-pop">
+                {formatBRL(total - discount)}
+              </span>
             </span>
           </div>
-          <a href={buildWhatsAppLink(vehicle, pkg, addons)} target="_blank" rel="noopener noreferrer" className="btn-primary group mt-6 w-full">
-            Agendar este pacote
-            <ArrowRight className="size-5 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
-          </a>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <label htmlFor="cupom" className="sr-only">
+              Cupom de desconto
+            </label>
+            <input
+              id="cupom"
+              value={couponInput}
+              onChange={(e) => {
+                setCouponInput(e.target.value)
+                setCouponTouched(false)
+              }}
+              onBlur={() => setCouponTouched(true)}
+              onKeyDown={(e) => e.key === 'Enter' && setCouponTouched(true)}
+              placeholder="Cupom"
+              autoComplete="off"
+              spellCheck="false"
+              aria-invalid={Boolean(couponError)}
+              aria-describedby="cupom-msg"
+              className={`min-w-28 flex-1 rounded-xl border bg-surface px-4 py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-200 ease-in-out placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-muted ${
+                coupon ? 'border-emerald-600' : couponError ? 'border-wine' : 'border-line hover:border-ink/20'
+              }`}
+            />
+            <a
+              href={buildWhatsAppLink(vehicle, pkg, addons, coupon)}
+              onClick={markCouponUsed}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary group flex-[2] whitespace-nowrap px-5"
+            >
+              Agendar este pacote
+              <ArrowRight className="size-5 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+            </a>
+          </div>
+          <p id="cupom-msg" aria-live="polite" className={`mt-2 min-h-4 text-xs font-medium ${coupon ? 'text-emerald-700' : 'text-wine'}`}>
+            {coupon ? `${coupon.percent}% de desconto aplicado.` : couponError}
+          </p>
           <p className="mt-4 flex gap-2 text-xs leading-relaxed text-muted">
             <Info className="size-4 shrink-0" aria-hidden="true" />
             Valores de referência. O valor final é confirmado após avaliação do veículo.
