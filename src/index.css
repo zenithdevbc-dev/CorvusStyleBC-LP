@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* Paleta da marca Corvus Style (bordô e dourado) sobre base clara */
+/* Paleta da marca Corvus Style */
 @theme {
   --color-canvas: #faf9f6;
   --color-surface: #ffffff;
