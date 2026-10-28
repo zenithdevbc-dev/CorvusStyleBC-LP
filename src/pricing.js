@@ -19,7 +19,7 @@ export const PACKAGES = [
   {
     id: 'tecnico',
     label: 'Técnico',
-    description: 'Descontaminação da pintura, limpeza técnica interna e proteção dos plásticos.',
+    description: 'Limpeza técnica interna e proteção dos plásticos.',
     prices: { hatch: 130, suv: 150, pickup: 180 },
   },
 ]
