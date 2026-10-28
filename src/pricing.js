@@ -26,6 +26,7 @@ export const PACKAGES = [
 
 export const ADDONS = [
   { id: 'motor', label: 'Detalhamento de motor', price: 90 },
+  { id: 'descontaminacao', label: 'Descontaminação de Pintura', price: 75 },
   // Mesmo `group` = opções que se excluem (marcar uma desmarca a outra)
   { id: 'vidros-parabrisa', label: 'Cristalização de vidros (só para-brisa)', price: 40, group: 'vidros' },
   { id: 'vidros-todos', label: 'Cristalização de vidros (todos os vidros)', price: 120, group: 'vidros' },
@@ -42,6 +43,7 @@ export function toggleAddon(selected, id) {
 // shortcut: os códigos ficam visíveis no JS do site e o "uso único" é só por navegador; trocar por backend se um cupom valer muito
 export const COUPONS = [
   { code: 'BRILHO15', percent: 15, active: true },
+  { code: 'ESPECIAL44', percent: 44, active: true },
 ]
 
 export function findCoupon(code) {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ArrowRight, Car, Check, Info } from 'lucide-react'
 import { ADDONS, PACKAGES, VEHICLES, buildWhatsAppLink, calcTotal, discountValue, findCoupon, formatBRL, toggleAddon } from '../pricing.js'
+import { registerSale } from '../salesCounter.js'
 
 // Cupons já usados ficam no navegador do cliente; sem localStorage (aba anônima bloqueada) o controle só dura a visita
 const USED_KEY = 'corvus:cupons-usados'
@@ -175,7 +176,10 @@ export default function Calculator() {
             />
             <a
               href={buildWhatsAppLink(vehicle, pkg, addons, coupon)}
-              onClick={markCouponUsed}
+              onClick={() => {
+                markCouponUsed()
+                registerSale()
+              }}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary group flex-[2] whitespace-nowrap px-5"

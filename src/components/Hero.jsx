@@ -1,6 +1,7 @@
 import { Clock, Droplets, MessageCircle, ReceiptText, ShieldCheck, Sparkles } from 'lucide-react'
 import { genericWhatsAppLink } from '../pricing.js'
 import Img from './Img.jsx'
+import SalesCount from './SalesCount.jsx'
 
 const TRUST = [
   [ReceiptText, 'Preço visível antes de agendar'],
@@ -58,6 +59,7 @@ export default function Hero() {
               Calcular orçamento
             </a>
           </div>
+          <SalesCount />
           <ul className="mt-10 grid gap-3 text-sm text-muted sm:grid-cols-3">
             {TRUST.map(([Icon, text]) => (
               <li key={text} className="flex items-center gap-2">

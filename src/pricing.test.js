@@ -57,3 +57,13 @@ test('cupom: desconto em centavos e aplicado no link', () => {
   assert.match(text, /Cupom BRILHO15 \(-15%\): -R\$\s13,50/)
   assert.match(text, /Total estimado: R\$\s76,50/)
 })
+
+test('cupom ESPECIAL44: 44% de desconto, arredondado em centavos', () => {
+  const coupon = findCoupon('especial44')
+  assert.equal(coupon.percent, 44)
+  assert.equal(discountValue(130, coupon), 57.2)
+  assert.equal(discountValue(250, coupon), 110)
+  const text = decodeURIComponent(buildWhatsAppLink('suv', 'tecnico', ['motor'], coupon).split('text=')[1])
+  assert.match(text, /Cupom ESPECIAL44 \(-44%\): -R\$\s105,60/)
+  assert.match(text, /Total estimado: R\$\s134,40/)
+})
