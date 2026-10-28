@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { ArrowRight, Car, Check, Info } from 'lucide-react'
-import { ADDONS, PACKAGES, VEHICLES, buildWhatsAppLink, calcTotal, discountValue, findCoupon, formatBRL, toggleAddon } from '../pricing.js'
+import { useRef, useState } from 'react'
+import { ArrowRight, Car, Check, Info, MapPin } from 'lucide-react'
+import { travelFrom } from '../distance.js'
+import { ADDONS, PACKAGES, TRAVEL_POLICY, VEHICLES, buildWhatsAppLink, calcTotal, discountValue, findCoupon, formatBRL, toggleAddon, travelFee } from '../pricing.js'
 import { registerSale } from '../salesCounter.js'
 
 // Cupons já usados ficam no navegador do cliente; sem localStorage (aba anônima bloqueada) o controle só dura a visita
@@ -56,6 +57,29 @@ export default function Calculator() {
       ? 'Cupom inválido ou expirado.'
       : ''
 
+  const [addressInput, setAddressInput] = useState('')
+  const [travel, setTravel] = useState(null)
+  const [travelStatus, setTravelStatus] = useState('') // '' | 'loading' | mensagem de erro
+  const lookupId = useRef(0)
+  const fee = travel ? travelFee(travel.km) : 0
+
+  const calcTravel = async (event) => {
+    event.preventDefault()
+    if (!addressInput.trim()) return
+    // Só a última busca vale: o cliente pode editar e buscar de novo antes da anterior voltar
+    const id = ++lookupId.current
+    setTravel(null)
+    setTravelStatus('loading')
+    try {
+      const result = await travelFrom(addressInput)
+      if (id !== lookupId.current) return
+      setTravel(result)
+      setTravelStatus(result ? '' : 'Endereço não encontrado. Confira o CEP ou inclua rua e cidade.')
+    } catch {
+      if (id === lookupId.current) setTravelStatus('Não foi possível calcular agora. Tente de novo em instantes.')
+    }
+  }
+
   // O uso é registrado quando o cliente envia o pedido com o cupom, não quando digita
   const markCouponUsed = () => {
     if (!coupon) return
@@ -68,7 +92,7 @@ export default function Calculator() {
     <section id="orcamento" className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-28">
       <div className="mb-12 max-w-2xl">
         <span className="eyebrow">Orçamento online</span>
-        <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">Monte seu orçamento em três passos</h2>
+        <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">Monte seu orçamento em quatro passos</h2>
         <p className="mt-3 text-lg text-muted">O valor atualiza conforme você escolhe.</p>
       </div>
 
@@ -115,6 +139,36 @@ export default function Calculator() {
               ))}
             </div>
           </Step>
+
+          <Step n="4" title="Endereço do atendimento">
+            <form onSubmit={calcTravel} className="flex flex-wrap gap-3">
+              <label htmlFor="endereco" className="sr-only">
+                CEP ou endereço
+              </label>
+              <input
+                id="endereco"
+                value={addressInput}
+                onChange={(e) => {
+                  setAddressInput(e.target.value)
+                  setTravel(null)
+                  setTravelStatus('')
+                }}
+                placeholder="CEP ou rua, número e cidade"
+                autoComplete="street-address"
+                aria-describedby="endereco-msg"
+                aria-invalid={Boolean(travelStatus && travelStatus !== 'loading')}
+                className="min-w-0 flex-[3] basis-56 rounded-xl border border-line bg-surface px-4 py-3.5 text-sm transition-all duration-200 ease-in-out placeholder:text-muted hover:border-ink/20"
+              />
+              <button type="submit" disabled={travelStatus === 'loading'} className="btn-primary flex-1 whitespace-nowrap px-5 disabled:opacity-60">
+                {travelStatus === 'loading' ? 'Calculando…' : 'Calcular'}
+              </button>
+            </form>
+            <p id="endereco-msg" aria-live="polite" className={`mt-2 min-h-4 text-xs font-medium ${travel ? 'text-emerald-700' : 'text-wine'}`}>
+              {travel
+                ? `${String(travel.km).replace('.', ',')} km de distância. ${fee ? `Deslocamento: ${formatBRL(fee)}.` : 'Deslocamento sem custo.'}`
+                : travelStatus !== 'loading' && travelStatus}
+            </p>
+          </Step>
         </div>
 
         <aside className="card h-fit p-6 lg:sticky lg:top-24">
@@ -142,13 +196,22 @@ export default function Calculator() {
                 <dd className="font-medium tabular-nums">-{formatBRL(discount)}</dd>
               </div>
             )}
+            {travel && (
+              <div className="flex justify-between gap-4 motion-safe:animate-pop">
+                <dt className="flex items-center gap-1.5 text-muted">
+                  <MapPin className="size-3.5" aria-hidden="true" />
+                  Deslocamento ({String(travel.km).replace('.', ',')} km)
+                </dt>
+                <dd className="font-medium tabular-nums">{fee ? formatBRL(fee) : 'Sem custo'}</dd>
+              </div>
+            )}
           </dl>
           <div className="mt-6 flex items-end justify-between gap-4" aria-live="polite">
             <span className="text-sm text-muted">Total estimado</span>
             <span className="text-right">
-              {coupon && <s className="block text-sm tabular-nums text-muted">{formatBRL(total)}</s>}
-              <span key={total - discount} className="text-3xl font-extrabold tabular-nums tracking-tight motion-safe:animate-pop">
-                {formatBRL(total - discount)}
+              {coupon && <s className="block text-sm tabular-nums text-muted">{formatBRL(total + fee)}</s>}
+              <span key={total - discount + fee} className="text-3xl font-extrabold tabular-nums tracking-tight motion-safe:animate-pop">
+                {formatBRL(total - discount + fee)}
               </span>
             </span>
           </div>
@@ -175,7 +238,7 @@ export default function Calculator() {
               }`}
             />
             <a
-              href={buildWhatsAppLink(vehicle, pkg, addons, coupon)}
+              href={buildWhatsAppLink(vehicle, pkg, addons, coupon, travel)}
               onClick={() => {
                 markCouponUsed()
                 registerSale()
@@ -194,6 +257,10 @@ export default function Calculator() {
           <p className="mt-4 flex gap-2 text-xs leading-relaxed text-muted">
             <Info className="size-4 shrink-0" aria-hidden="true" />
             Valores de referência. O valor final é confirmado após avaliação do veículo.
+          </p>
+          <p className="mt-2 flex gap-2 text-xs leading-relaxed text-muted">
+            <Car className="size-4 shrink-0" aria-hidden="true" />
+            {TRAVEL_POLICY}
           </p>
         </aside>
       </div>

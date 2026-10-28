@@ -53,6 +53,12 @@ export function findCoupon(code) {
 
 export const discountValue = (total, coupon) => (coupon ? Math.round(total * coupon.percent) / 100 : 0)
 
+// Deslocamento: distância de carro da base (src/distance.js); cobra só os km acima da franquia
+export const TRAVEL_POLICY = 'A partir de 15 km rodados, adicional de R$ 1,85 por km adicional.'
+const TRAVEL_FREE_KM = 15
+const TRAVEL_PRICE_PER_KM = 1.85
+export const travelFee = (km) => (km > TRAVEL_FREE_KM ? Math.round((km - TRAVEL_FREE_KM) * TRAVEL_PRICE_PER_KM * 100) / 100 : 0)
+
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 export const formatBRL = (value) => brl.format(value)
 
@@ -64,19 +70,27 @@ export function calcTotal(vehicleId, packageId, addonIds) {
   return pkg.prices[vehicleId] + ADDONS.filter((a) => addonIds.includes(a.id)).reduce((sum, a) => sum + a.price, 0)
 }
 
-export function buildWhatsAppLink(vehicleId, packageId, addonIds, coupon = null, phone = WHATSAPP_NUMBER) {
+// travel = { label, km } do endereço calculado, ou null se o cliente não informou
+export function buildWhatsAppLink(vehicleId, packageId, addonIds, coupon = null, travel = null, phone = WHATSAPP_NUMBER) {
   const vehicle = byId(VEHICLES, vehicleId)
   const pkg = byId(PACKAGES, packageId)
   const extras = ADDONS.filter((a) => addonIds.includes(a.id))
   const total = calcTotal(vehicleId, packageId, addonIds)
+  // O cupom vale para os serviços, não para o deslocamento
   const discount = discountValue(total, coupon)
+  const fee = travel ? travelFee(travel.km) : 0
+  const kmText = travel && `${String(travel.km).replace('.', ',')} km`
   const lines = [
     'Olá, Corvus Style! Quero agendar:',
     `• Veículo: ${vehicle.label}`,
     `• Pacote: ${pkg.label} (${formatBRL(pkg.prices[vehicleId])})`,
     ...extras.map((a) => `• + ${a.label} (${formatBRL(a.price)})`),
     ...(coupon ? [`• Cupom ${coupon.code} (-${coupon.percent}%): -${formatBRL(discount)}`] : []),
-    `Total estimado: ${formatBRL(total - discount)}`,
+    ...(travel
+      ? [`• Endereço: ${travel.label}`, `• Deslocamento (${kmText}): ${fee ? formatBRL(fee) : 'sem custo'}`]
+      : []),
+    `Total estimado: ${formatBRL(total - discount + fee)}`,
+    ...(travel ? [] : [`Deslocamento: ${TRAVEL_POLICY}`]),
     'Qual o melhor dia e horário?',
   ]
   return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`

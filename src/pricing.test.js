@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { calcTotal, buildWhatsAppLink, genericWhatsAppLink, findCoupon, discountValue, COUPONS, toggleAddon } from './pricing.js'
+import { calcTotal, buildWhatsAppLink, genericWhatsAppLink, findCoupon, discountValue, COUPONS, toggleAddon, travelFee } from './pricing.js'
 
 test('preço base por veículo e pacote', () => {
   assert.equal(calcTotal('hatch', 'basico', []), 90)
@@ -31,7 +31,7 @@ test('links usam o número padrão com DDI', () => {
 })
 
 test('link do WhatsApp contém itens e total, codificados', () => {
-  const url = buildWhatsAppLink('suv', 'tecnico', ['motor'], null, '5547999999999')
+  const url = buildWhatsAppLink('suv', 'tecnico', ['motor'], null, null, '5547999999999')
   assert.ok(url.startsWith('https://wa.me/5547999999999?text='))
   const text = decodeURIComponent(url.split('text=')[1])
   assert.match(text, /Veículo: SUV/)
@@ -66,4 +66,25 @@ test('cupom ESPECIAL44: 44% de desconto, arredondado em centavos', () => {
   const text = decodeURIComponent(buildWhatsAppLink('suv', 'tecnico', ['motor'], coupon).split('text=')[1])
   assert.match(text, /Cupom ESPECIAL44 \(-44%\): -R\$\s105,60/)
   assert.match(text, /Total estimado: R\$\s134,40/)
+  assert.match(text, /Deslocamento: A partir de 15 km rodados, adicional de R\$ 1,85 por km adicional\./)
+})
+
+test('deslocamento: até 15 km sem custo, acima cobra R$ 1,85 por km excedente', () => {
+  assert.equal(travelFee(0), 0)
+  assert.equal(travelFee(15), 0)
+  assert.equal(travelFee(16), 1.85)
+  assert.equal(travelFee(95.8), 149.48)
+})
+
+test('deslocamento entra no link e no total, fora do desconto do cupom', () => {
+  const coupon = findCoupon('BRILHO15')
+  const travel = { label: 'Ribeirão Preto, SP', km: 95.8 }
+  const text = decodeURIComponent(buildWhatsAppLink('hatch', 'basico', [], coupon, travel).split('text=')[1])
+  assert.match(text, /Endereço: Ribeirão Preto, SP/)
+  assert.match(text, /Deslocamento \(95,8 km\): R\$\s149,48/)
+  assert.match(text, /Total estimado: R\$\s225,98/) // 90 - 13,50 + 149,48
+  assert.doesNotMatch(text, /A partir de 15 km/)
+  const near = decodeURIComponent(buildWhatsAppLink('hatch', 'basico', [], null, { label: 'Centro', km: 12 }).split('text=')[1])
+  assert.match(near, /Deslocamento \(12 km\): sem custo/)
+  assert.match(near, /Total estimado: R\$\s90,00/)
 })
