@@ -239,7 +239,14 @@ export default function Calculator() {
             />
             <a
               href={buildWhatsAppLink(vehicle, pkg, addons, coupon, travel)}
-              onClick={() => {
+              onClick={(e) => {
+                // Endereço é obrigatório: sem ele o clique leva o cliente de volta ao campo
+                if (!travel) {
+                  e.preventDefault()
+                  document.getElementById('endereco').focus()
+                  if (travelStatus !== 'loading') setTravelStatus('Informe o endereço e clique em Calcular para enviar o orçamento.')
+                  return
+                }
                 markCouponUsed()
                 registerSale()
               }}

@@ -91,7 +91,7 @@ export function buildWhatsAppLink(vehicleId, packageId, addonIds, coupon = null,
       : []),
     `Total estimado: ${formatBRL(total - discount + fee)}`,
     ...(travel ? [] : [`Deslocamento: ${TRAVEL_POLICY}`]),
-    'Qual o melhor dia e horário?',
+    'Gostaria de agendar um horário.',
   ]
   return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`
 }
